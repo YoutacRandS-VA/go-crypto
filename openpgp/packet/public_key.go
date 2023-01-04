@@ -637,7 +637,6 @@ func (pk *PublicKey) parseEdDSA(r io.Reader) (err error) {
 	return
 }
 
-<<<<<<< HEAD
 func (pk *PublicKey) parseX25519(r io.Reader) (err error) {
 	point := make([]byte, x25519.PointSize)
 	_, err = io.ReadFull(r, point)
@@ -690,10 +689,7 @@ func (pk *PublicKey) parseEd448(r io.Reader) (err error) {
 	return
 }
 
-// parseKyberECDH parses a Dilithium + ECDSA public key as specified in
-=======
 // parseDilithiumECDSA parses a Dilithium + ECDSA public key as specified in
->>>>>>> bf54e14 (Add SPHINCS+ signature support)
 // https://www.ietf.org/archive/id/draft-wussler-openpgp-pqc-00.html#section-5.3.2
 func (pk *PublicKey) parseDilithiumECDSA(r io.Reader, ecLen, dLen int) (err error) {
 	pk.p = encoding.NewEmptyOctetArray(ecLen)
