@@ -261,13 +261,13 @@ func TestNewEntity(t *testing.T) {
 
 func TestEncryptWithAEAD(t *testing.T) {
 	c := &packet.Config{
-		Algorithm:   packet.ExperimentalPubKeyAlgoAEAD,
+		Algorithm:     packet.ExperimentalPubKeyAlgoAEAD,
 		DefaultCipher: packet.CipherAES256,
 		AEADConfig: &packet.AEADConfig{
 			DefaultMode: packet.AEADMode(1),
 		},
 	}
-	entity, err := NewEntity("Golang Gopher", "Test Key", "no-reply@golang.com", &packet.Config{ RSABits: 1024})
+	entity, err := NewEntity("Golang Gopher", "Test Key", "no-reply@golang.com", &packet.Config{RSABits: 1024})
 	if err != nil {
 		t.Fatal(err)
 	}
@@ -277,8 +277,7 @@ func TestEncryptWithAEAD(t *testing.T) {
 		t.Fatal(err)
 	}
 
-	var list []*Entity
-	list = make([]*Entity, 1)
+	list := make([]*Entity, 1)
 	list[0] = entity
 	entityList := EntityList(list)
 	buf := bytes.NewBuffer(nil)
@@ -303,7 +302,7 @@ func TestEncryptWithAEAD(t *testing.T) {
 	}
 	dec, err := ioutil.ReadAll(m.decrypted)
 
-	if bytes.Compare(dec, []byte(message)) != 0 {
+	if !bytes.Equal(dec, []byte(message)) {
 		t.Error("decrypted does not match original")
 	}
 }
@@ -313,7 +312,7 @@ func TestSignWithHMAC(t *testing.T) {
 		Algorithm:   packet.ExperimentalPubKeyAlgoHMAC,
 		DefaultHash: crypto.SHA512,
 	}
-	entity, err := NewEntity("Golang Gopher", "Test Key", "no-reply@golang.com", &packet.Config{ RSABits: 1024})
+	entity, err := NewEntity("Golang Gopher", "Test Key", "no-reply@golang.com", &packet.Config{RSABits: 1024})
 	if err != nil {
 		t.Fatal(err)
 	}
@@ -322,8 +321,7 @@ func TestSignWithHMAC(t *testing.T) {
 	if err != nil {
 		t.Fatal(err)
 	}
-	var list []*Entity
-	list = make([]*Entity, 1)
+	list := make([]*Entity, 1)
 	list[0] = entity
 	entityList := EntityList(list)
 
@@ -366,7 +364,7 @@ func TestEncryptWithCompression(t *testing.T) {
 	buf := new(bytes.Buffer)
 	var config = &packet.Config{
 		DefaultCompressionAlgo: packet.CompressionZIP,
-		CompressionConfig:      &packet.CompressionConfig{-1},
+		CompressionConfig:      &packet.CompressionConfig{Level: -1},
 	}
 	w, err := Encrypt(buf, kring[:1], nil, nil /* no hints */, config)
 	if err != nil {
@@ -476,6 +474,9 @@ func TestSymmetricEncryptionV5RandomizeSlow(t *testing.T) {
 	packets := packet.NewReader(copiedBuf)
 	// First a SymmetricKeyEncrypted packet
 	p, err := packets.Next()
+	if err != nil {
+		t.Fatal(err)
+	}
 	switch tp := p.(type) {
 	case *packet.SymmetricKeyEncrypted:
 	default:
@@ -483,6 +484,9 @@ func TestSymmetricEncryptionV5RandomizeSlow(t *testing.T) {
 	}
 	// Then an SymmetricallyEncrypted packet version 2
 	p, err = packets.Next()
+	if err != nil {
+		t.Fatal(err)
+	}
 	switch tp := p.(type) {
 	case *packet.SymmetricallyEncrypted:
 		if tp.Version != 2 {
@@ -573,7 +577,7 @@ func TestEncryption(t *testing.T) {
 		}
 		compAlgo := compAlgos[mathrand.Intn(len(compAlgos))]
 		level := mathrand.Intn(11) - 1
-		compConf := &packet.CompressionConfig{level}
+		compConf := &packet.CompressionConfig{Level: level}
 		var config = &packet.Config{
 			DefaultCompressionAlgo: compAlgo,
 			CompressionConfig:      compConf,
@@ -842,6 +846,9 @@ FindKey:
 	}
 
 	decPackets, err := packet.Read(decrypted)
+	if err != nil {
+		return err
+	}
 	_, ok := decPackets.(*packet.Compressed)
 	if !ok {
 		return errors.InvalidArgumentError("No compressed packets found")
